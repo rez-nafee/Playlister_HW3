@@ -16,19 +16,24 @@ function EditToolbar() {
     function handleUndo() {
         store.undo();
     }
+
     function handleRedo() {
         store.redo();
     }
+
     function handleClose() {
         history.push("/");
         store.closeCurrentList();
     }
+
     let editStatus = false;
+
     if (store.isListNameEditActive) {
         editStatus = true;
     }
+
     return (
-        <span id="edit-toolbar">
+        <div id="edit-toolbar">
             <input
                 type="button"
                 id='add-song-button'
@@ -60,7 +65,7 @@ function EditToolbar() {
                 className={enabledButtonClass}
                 onClick={handleClose}
             />
-        </span>);
+        </div>);
 }
 
 export default EditToolbar;
