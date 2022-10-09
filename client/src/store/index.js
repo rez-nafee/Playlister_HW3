@@ -169,6 +169,29 @@ export const useGlobalStore = () => {
         asyncLoadIdNamePairs();
     }
 
+    store.createNewList = function (name, songs) {
+        async function asyncCreateNewList (name, songs){
+            let response = await api.createPlaylist(name, songs);
+            console.log("The response is: ", response);
+            if(response.data.success){
+                console.log ("The playlist is: ", response.data.playlist)
+                let playlist = response.data.playlist
+                if (response.data.success) {
+                    storeReducer({
+                        type: GlobalStoreActionType.CREATE_NEW_LIST,
+                        payload: playlist
+                    });
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                    store.history.push("/playlist/" + playlist._id);
+                }
+            }
+        }
+        asyncCreateNewList(name, songs);
+    }
+
     store.setCurrentList = function (id) {
         async function asyncSetCurrentList(id) {
             let response = await api.getPlaylistById(id);

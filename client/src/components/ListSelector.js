@@ -16,10 +16,14 @@ const ListSelector = () => {
     }, []);
 
     function handleCreateNewList() {
-        store.createNewList();
+        console.log(store.newListCounter);
+        var name = "Untitled"
+        var songs = [] 
+        store.createNewList(name, songs);
     }
     let listCard = "";
     if (store) {
+        listCard = store.idNamePairs.sort((a,b) => a.name > b.name ? 1 : -1)
         listCard = store.idNamePairs.map((pair) => (
             <ListCard
                 key={pair._id}

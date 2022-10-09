@@ -92,6 +92,15 @@ body {
   opacity: 100%;
 }
 
+.list-selector-list{
+  overflow: scroll;
+}
+
+.card-buttons{
+  display: inline-flex;
+  float: right;
+}
+
 .playlister-button:hover {
   cursor: pointer;
   color:black;
