@@ -8,7 +8,11 @@ const express = require('express')
 const PlaylistController = require('../controllers/playlist-controller')
 const router = express.Router()
 
+// POST METHODS FOR UPDATING THE DOCUMENTS IN THE DATABASE
 router.post('/playlist', PlaylistController.createPlaylist)
+router.post('/updatePlaylistName', PlaylistController.updatePlaylistName)
+
+// GET METHODS FOR RETRIEVING INFO FROM THE DATABASE
 router.get('/playlist/:id', PlaylistController.getPlaylistById)
 router.get('/playlists', PlaylistController.getPlaylists)
 router.get('/playlistpairs', PlaylistController.getPlaylistPairs)

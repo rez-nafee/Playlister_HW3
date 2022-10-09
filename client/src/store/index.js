@@ -43,7 +43,7 @@ export const useGlobalStore = () => {
             case GlobalStoreActionType.CHANGE_LIST_NAME: {
                 return setStore({
                     idNamePairs: payload.idNamePairs,
-                    currentList: payload.playlist,
+                    currentList: null,
                     newListCounter: store.newListCounter,
                     listNameActive: false
                 });
@@ -115,11 +115,14 @@ export const useGlobalStore = () => {
         // GET THE LIST
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
+            console.log(response.data.playlist)
             if (response.data.success) {
-                let playlist = response.data.playist;
-                playlist.name = newName;
-                async function updateList(playlist) {
-                    response = await api.updatePlaylistById(playlist._id, playlist);
+                let playlist = response.data.playlist;
+                playlist.name = newName
+                console.log(api)
+                async function updateListName(playlist, newName) {
+                    response = await api.updatePlaylistName(playlist._id, newName);
+                    console.log(response)
                     if (response.data.success) {
                         async function getListPairs(playlist) {
                             response = await api.getPlaylistPairs();
@@ -137,7 +140,7 @@ export const useGlobalStore = () => {
                         getListPairs(playlist);
                     }
                 }
-                updateList(playlist);
+                updateListName(playlist, newName);
             }
         }
         asyncChangeListName(id);
@@ -220,7 +223,7 @@ export const useGlobalStore = () => {
     }
 
     // THIS FUNCTION ENABLES THE PROCESS OF EDITING A LIST NAME
-    store.setlistNameActive = function () {
+    store.setIsListNameEditActive = function () {
         storeReducer({
             type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
             payload: null
