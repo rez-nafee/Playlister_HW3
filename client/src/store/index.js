@@ -1,12 +1,14 @@
 import { createContext, useState } from 'react'
 import jsTPS from '../common/jsTPS'
 import api from '../api'
+import AddSong_Transaction from '../transactions/AddSong_Transaction';
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
     which makes use of things like actions and reducers. 
     
     @author McKilla Gorilla
+    @author Rezvan Nafee
 */
 
 // THESE ARE ALL THE TYPES OF UPDATES TO OUR GLOBAL
@@ -227,6 +229,7 @@ export const useGlobalStore = () => {
         asyncLoadIdNamePairs();
     }
 
+    // THIS FUNCTION CREATES A NEW LIST FOR THE USER
     store.createNewList = function (name, songs) {
         async function asyncCreateNewList (name, songs){
             let response = await api.createPlaylist(name, songs);
@@ -250,6 +253,7 @@ export const useGlobalStore = () => {
         asyncCreateNewList(name, songs);
     }
 
+    // THIS FUCTION SETS THE CURRENT LIST 
     store.setCurrentList = function (id) {
         async function asyncSetCurrentList(id) {
             let response = await api.getPlaylistById(id);
@@ -267,12 +271,76 @@ export const useGlobalStore = () => {
         }
         asyncSetCurrentList(id);
     }
+
+    // FUNCTIONS FOR ADDING, REMOVING, EDITING A SONG
+
+    // FUNCTION FOR REMOVING & ADDING TO THE CURRENT LIST: 
+    // THIS IS A FUNCTION FOR ADDING A SONG TO THE CURRENT LIST
+    store.addNewSong = function () {
+        async function addNewSongToList(id, song){
+            console.log("We will be adding a song to a list with an ID of: ", id)
+            console.log("Song to add: ", song)
+            // SEND A RESPONSE OVER TO OUR SERVER
+            let response = await api.addNewSong(id,song);
+            if(response.data.success){
+                // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
+                let playlist = response.data.playlist;
+                if (response.data.success) {
+                    // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                }
+            }
+        }
+        console.log("Adding a new song to the current list!")
+        // CREATE A DEFAULT SONG OBJECT TO BE ADDED TO THE LIST 
+        let newSong = {
+            title: "Untitled",
+            artist: "Unkown",
+            youTubeId: "dQw4w9WgXcQ"
+        }
+        // CALL TO FUNCTION TO UPDATE THE DOCUMENTS IN THE DATABASE
+        addNewSongToList(store.currentList._id, newSong); 
+    }
+    //FUNCTION FOR REMOVING A NEWLY ADDED SONG TO THE LIST
+    store.removeNewAddedSong = function () {
+        async function removeNewSong (id) {
+            // send A RESPONSE TO OUR SERVER TO REMOVE THE NEWLY ADDED SONG
+            let response = await api.removeNewSong(id);
+            if(response.data.success){
+                // IF THE RESPONSE WAS SUCCESSFUL, THEN WE CAN UPDATE THE CURRENT LIST.
+                let playlist = response.data.playlist;
+                console.log(playlist)
+                if (response.data.success) {
+                    //UPDATE THE CURRENT LIST 
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                }
+            }
+        } 
+        console.log("Removing newly adding song...")
+        // CALL TO FUNCTION TO UPDATE THE DOCUMENTS IN THE DATABSE
+        removeNewSong(store.currentList._id); 
+    }
+    // FUNCTION FOR FACILITATING THE ADDING AND REMOVAL OF A NEWLY ADDED SONG TO THE LIST 
+    store.addNewSongTransaction = function (){
+        console.log("Adding new song to list...")
+        let transaction = new AddSong_Transaction(this);
+        tps.addTransaction(transaction);
+    }
+
     store.getPlaylistSize = function() {
         return store.currentList.songs.length;
     }
+
     store.undo = function () {
         tps.undoTransaction();
     }
+
     store.redo = function () {
         tps.doTransaction();
     }

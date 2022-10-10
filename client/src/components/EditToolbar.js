@@ -19,7 +19,7 @@ function EditToolbar() {
 
     function handleAdd(){
         console.log("adding song!")
-        console.log(store)
+        store.addNewSongTransaction();
     }
 
     function handleRedo() {

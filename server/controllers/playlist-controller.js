@@ -67,7 +67,6 @@ updatePlaylistName = async (req, res) => {
 }
 
 deletePlayliyById = async (req,res) => {
-    console.log(req.body)
     await Playlist.findByIdAndDelete({ _id: req.body.id }, (err,list) => {
         // IF THERE WAS AN ERROR ENCOUNTERED WHILE SEARCHING FOR THE ID, RETURN A BAD RESPONSE. 
         if (err) {
@@ -84,7 +83,7 @@ deletePlayliyById = async (req,res) => {
             playlist: list, 
             message: "SUCESS: DELETED PLAYLIST!",
         })
-    }).catch(err => console.log(req.body)) 
+    }).catch(err => console.log(err)) 
 }
  
 getPlaylistById = async (req, res) => {
@@ -137,11 +136,61 @@ getPlaylistPairs = async (req, res) => {
     }).catch(err => console.log(err))
 }
 
+// FUNCTIONS FOR SONGS
+
+// ADDING A NEW SONG TO THE LIST. 
+addNewSong = async (req, res) => {
+    console.log("We will be adding a song to a list with an ID of: ", req.body.id)
+    console.log("Song to add: ", req.body.song)
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // ADD THE NEW SONG TO THE LIST
+        list.songs.push(req.body.song)
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("ADDED THE NEW SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: 'ADDED THE NEW SONG!',
+            })
+        })
+    }).catch(err => console.log(err))
+}
+// REMOVING THE NEWLY ADDED SONG FROM THE LIST
+removeNewSong = async (req,res) => {
+    console.log("We will be removing a newly added song from list with an ID of: ", req.body.id)
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // REMOVE THE NEWLY SONG FROM THE LIST
+        list.songs.pop(); 
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("REMOVED THE NEWLY ADDED SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: 'REMOVED THE NEWLY ADDED SONG!',
+            })
+        })
+    }).catch(err => console.log(err))
+}
+
 module.exports = {
     createPlaylist,
     getPlaylists,
     getPlaylistPairs,
     getPlaylistById,
     updatePlaylistName,
-    deletePlayliyById
+    deletePlayliyById,
+    addNewSong,
+    removeNewSong
 }
