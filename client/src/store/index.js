@@ -175,6 +175,7 @@ export const useGlobalStore = () => {
 
     // THIS FUNCTION CLOSES THE MODAL & HIDES THE MODAL FROM THE CUSTOMER 
     store.closeDeleteListModal = function (){
+        tps.clearAllTransactions();
         storeReducer({
             type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
             payload: {}
@@ -212,11 +213,15 @@ export const useGlobalStore = () => {
         deleteList(store.deleteListPair._id);
         // HIDE THE MODAL FROM THE USER. 
         document.getElementById("delete-list-modal").classList.remove("is-visible");
+        // CLEAR ALL TRANSACTIONS FROM THE TRANSACTION STACK
+        tps.clearAllTransactions();
     }
 
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
+        //CLEAR THE TRANSACTION STACK
+        tps.clearAllTransactions();
         storeReducer({
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
@@ -267,6 +272,8 @@ export const useGlobalStore = () => {
 
     // THIS FUCTION SETS THE CURRENT LIST 
     store.setCurrentList = function (id) {
+        //CLEAR THE TRANSACTION STACK 
+        tps.clearAllTransactions(); 
         async function asyncSetCurrentList(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
