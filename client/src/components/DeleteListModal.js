@@ -19,7 +19,7 @@ function DeleteListModal(props){
     // NAME OF THE LIST NAME THAT NEEDS TO BE DELETED 
     var name = ""
     if (store.deleteListPair)
-        // IF WE HAVE THE LIST MARKED FOR DELETION, GET THE SONG NAME. 
+        // IF WE HAVE THE LIST MARKED FOR DELETION, SET THE VARIABLE TO THE NAME OF THE LIST. 
         name = store.deleteListPair.name
 
     return (

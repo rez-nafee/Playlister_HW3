@@ -184,6 +184,59 @@ removeNewSong = async (req,res) => {
     }).catch(err => console.log(err))
 }
 
+removeSong = async (req,res) => {
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // MAKE A COPY OF THE SONGS WE CURRENTLY HAVE IN THE LIST
+        var songs = [...list.songs]
+        // START AT THE INDEX OF THE SONG THAT NEEDS TO BE REMOVED, AND REMOVE ONE ITEM
+        songs.splice(req.body.position,1)
+        // UPDATE THE SONGS WITHIN THE LIST 
+        list.songs = songs
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("REMOVED THE SPECIFIED SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: "REMOVED THE SPECIFIED SONG!",
+            })
+        })
+    }).catch(err => console.log(err))
+}
+
+addRemovedSong = async (req, res) => {
+    console.log("Adding removed song...")
+    console.log("Song that needs to be re-added: ", req.body.song)
+    console.log("Song needs to be added at position: ", req.body.position)
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // MAKE A COPY OF THE SONGS WE CURRENTLY HAVE IN THE LIST
+        var songs = [...list.songs]
+        // START AT THE SPECIFIED INDEX, REMOVE NOTHING, AND ADD ONE SONG! 
+        songs.splice(req.body.position,0,req.body.song)
+        // UPDATE THE SONGS WITHIN THE LIST 
+        list.songs = songs
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("ADDED THE REMOVED SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: "ADDED THE REMOVED SONG!",
+            })
+        })
+    }).catch(err => console.log(err))
+}
+
 module.exports = {
     createPlaylist,
     getPlaylists,
@@ -192,5 +245,7 @@ module.exports = {
     updatePlaylistName,
     deletePlayliyById,
     addNewSong,
-    removeNewSong
+    removeNewSong,
+    removeSong,
+    addRemovedSong
 }

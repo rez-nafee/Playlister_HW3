@@ -5,6 +5,12 @@ function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
 
     const { song, index } = props;
+
+    function handleRemoveSong() {
+        console.log("REMOVING SONG!") 
+        store.markSongForRemoval(song,index)
+    }
+
     let cardClass = "list-card unselected-list-card";
     return (
         <div
@@ -25,6 +31,7 @@ function SongCard(props) {
                 type="button"
                 id={"remove-song-" + index}
                 className="list-card-button"
+                onClick={handleRemoveSong}
                 value={"\u2715"}
             />
         </div>

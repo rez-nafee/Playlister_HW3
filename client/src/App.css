@@ -275,6 +275,10 @@ span {
   font-size: 28pt;
 }
 
+#remove-song-modal-center-content{
+  font-size: 28pt;
+}
+
 #title-prompt {
   grid-column: 1 / 2;
   grid-row: 1 / 2;

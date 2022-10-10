@@ -15,10 +15,12 @@ router.post('/playlist', PlaylistController.createPlaylist)
 // PUT METHODS FOR UPDATING DOCUMENTS IN THE THE DATABASE
 router.put('/updatePlaylistName', PlaylistController.updatePlaylistName)
 router.put('/addNewSong', PlaylistController.addNewSong)
+router.put('/addRemovedSong', PlaylistController.addRemovedSong)
 
 // DELETE METHODS FOR REMOVING DOCUMENTS FROM THE DATABASE 
 router.delete('/deletePlaylist', PlaylistController.deletePlayliyById)
 router.delete('/removeNewSong', PlaylistController.removeNewSong);
+router.delete('/removeSong', PlaylistController.removeSong); 
 
 // GET METHODS FOR RETRIEVING DOCUMENTS FROM THE DATABASE
 router.get('/playlist/:id', PlaylistController.getPlaylistById)

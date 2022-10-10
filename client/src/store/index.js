@@ -2,6 +2,7 @@ import { createContext, useState } from 'react'
 import jsTPS from '../common/jsTPS'
 import api from '../api'
 import AddSong_Transaction from '../transactions/AddSong_Transaction';
+import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction';
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
@@ -20,7 +21,8 @@ export const GlobalStoreActionType = {
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
-    MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION"
+    MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
+    MARK_SONG_FOR_REMOVAL: "MARK_SONG_FOR_REMOVAL"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -35,6 +37,7 @@ export const useGlobalStore = () => {
         currentList: null,
         newListCounter: 0,
         deleteListPair: null,
+        removeSongPair: null,
         listNameActive: false
     });
 
@@ -105,6 +108,15 @@ export const useGlobalStore = () => {
                     currentList: payload,
                     newListCounter: store.newListCounter,
                     listNameActive: true
+                });
+            }
+            case GlobalStoreActionType.MARK_SONG_FOR_REMOVAL: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    removeSongPair: payload,
+                    newListCounter: store.newListCounter,
+                    currentList: store.currentList
+
                 });
             }
             default:
@@ -272,15 +284,15 @@ export const useGlobalStore = () => {
         asyncSetCurrentList(id);
     }
 
-    // FUNCTIONS FOR ADDING, REMOVING, EDITING A SONG
+// FUNCTIONS FOR ADDING, REMOVING, EDITING A SONG
 
-    // FUNCTION FOR REMOVING & ADDING TO THE CURRENT LIST: 
-    // THIS IS A FUNCTION FOR ADDING A SONG TO THE CURRENT LIST
+// FUNCTION FOR REMOVING & ADDING A NEW SONG TO THE CURRENT LIST: 
+    // THIS IS A FUNCTION FOR ADDING A NEW SONG TO THE CURRENT LIST
     store.addNewSong = function () {
         async function addNewSongToList(id, song){
             console.log("We will be adding a song to a list with an ID of: ", id)
             console.log("Song to add: ", song)
-            // SEND A RESPONSE OVER TO OUR SERVER
+            // SEND A REQUEST OVER TO OUR SERVER
             let response = await api.addNewSong(id,song);
             if(response.data.success){
                 // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
@@ -304,10 +316,10 @@ export const useGlobalStore = () => {
         // CALL TO FUNCTION TO UPDATE THE DOCUMENTS IN THE DATABASE
         addNewSongToList(store.currentList._id, newSong); 
     }
-    //FUNCTION FOR REMOVING A NEWLY ADDED SONG TO THE LIST
+    // THIS IS A FUNCTION FOR REMOVING A NEWLY ADDED SONG TO THE LIST
     store.removeNewAddedSong = function () {
         async function removeNewSong (id) {
-            // send A RESPONSE TO OUR SERVER TO REMOVE THE NEWLY ADDED SONG
+            // SEND A REQUEST TO OUR SERVER TO REMOVE THE NEWLY ADDED SONG
             let response = await api.removeNewSong(id);
             if(response.data.success){
                 // IF THE RESPONSE WAS SUCCESSFUL, THEN WE CAN UPDATE THE CURRENT LIST.
@@ -326,10 +338,82 @@ export const useGlobalStore = () => {
         // CALL TO FUNCTION TO UPDATE THE DOCUMENTS IN THE DATABSE
         removeNewSong(store.currentList._id); 
     }
-    // FUNCTION FOR FACILITATING THE ADDING AND REMOVAL OF A NEWLY ADDED SONG TO THE LIST 
+    // THIS IS A FUNCTION FOR FACILITATING THE ADDING AND REMOVAL OF A NEWLY ADDED SONG TO THE LIST 
     store.addNewSongTransaction = function (){
         console.log("Adding new song to list...")
         let transaction = new AddSong_Transaction(this);
+        tps.addTransaction(transaction);
+    }
+// FUNCTION FOR REMOVING & ADDING A SONG TO THE CURRENT LIST: 
+    // THIS IS A FUNCTION FOR MARKING A SONG FOR REMOVAL 
+    store.markSongForRemoval = function (song,position) {
+        let pair = {
+            song: song,
+            position: position
+        } 
+        console.log(pair)
+        storeReducer({
+            type: GlobalStoreActionType.MARK_SONG_FOR_REMOVAL,
+            payload: pair
+        });
+        // SHOW THE MODAL FOR THE CONFIRMATION OF REMOVING THE SONG. 
+        document.getElementById("remove-song-modal").classList.add("is-visible");
+    } 
+    // THIS FUNCTION FOR HIDING THE REMOVE SONG MODAL. 
+    store.closeRemoveSongModal = function (){
+        storeReducer({
+            type: GlobalStoreActionType.MARK_SONG_FOR_REMOVAL,
+            payload: null
+        });
+        // HIDE THE MODAL FOR REMOVING THE SONG. 
+        document.getElementById("remove-song-modal").classList.remove("is-visible");
+    }
+    // THIS FUNCTION IS FOR REMOVING SONG FROM THE LIST
+    store.removeSong = function (){
+        async function removeSongFromPlaylist(id, position){
+            // SEND A REQUEST TO OUR SERVER TO REMOVE THE SONG FROM THE PLAYLIST WITH THE SPECIFIED ID AND POSITION 
+            let response = await api.removeSong(id, position);
+            if(response.data.success){
+                // IF THE RESPONSE WAS SUCCESSFUL, THEN WE CAN UPDATE THE CURRENT LIST.
+                let playlist = response.data.playlist;
+                console.log(playlist)
+                if (response.data.success) {
+                    //UPDATE THE CURRENT LIST 
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                }
+            }
+        }
+        removeSongFromPlaylist(store.currentList._id,store.removeSongPair.position)
+        // HIDE THE MODAL FOR REMOVING THE SONG. 
+        document.getElementById("remove-song-modal").classList.remove("is-visible");
+    }
+    // THIS IS A FUNCTION FOR ADDING BACK A REMOVED SONG WITH IT'S POSITION AND THE ACTUAL SONG REMOVED 
+    store.addRemovedSong = function (song, position){
+        async function addRemovedSong (song, position, id){
+            let response = await api.addRemovedSong(song,position, id);
+            if(response.data.success){
+                // IF THE RESPONSE WAS SUCCESSFUL, THEN WE CAN UPDATE THE CURRENT LIST.
+                let playlist = response.data.playlist;
+                console.log(playlist)
+                if (response.data.success) {
+                    //UPDATE THE CURRENT LIST 
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                }
+            } 
+        }
+        addRemovedSong(song, position, store.currentList._id)
+    }
+
+    // THIS IS A FUNCTION FOR FACILITATING THE ADDING AND REMOVAL OF A SONG TO THE LIST 
+    store.removeSongTransaction = function (){
+        console.log("Removing song from list...")
+        let transaction = new RemoveSong_Transaction(this, store.removeSongPair.song, store.removeSongPair.position);
         tps.addTransaction(transaction);
     }
 
