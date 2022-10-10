@@ -26,6 +26,11 @@ function ListCard(props) {
         }
     }
 
+    function handleDeleteList(){
+        console.log("MARKING SONG FOR DELETION...")
+        store.markListForDeletion(idNamePair)
+    }
+
     function handleToggleEdit(event) {
         event.stopPropagation();
         toggleEdit();
@@ -77,6 +82,7 @@ function ListCard(props) {
                     type="button"
                     id={"delete-list-" + idNamePair._id}
                     className="list-card-button"
+                    onClick = {handleDeleteList}
                     value={"\u2715"}
                 />
                 <input

@@ -18,6 +18,7 @@ export const GlobalStoreActionType = {
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
+    MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -31,6 +32,7 @@ export const useGlobalStore = () => {
         idNamePairs: [],
         currentList: null,
         newListCounter: 0,
+        deleteListPair: null,
         listNameActive: false
     });
 
@@ -80,6 +82,7 @@ export const useGlobalStore = () => {
                 return setStore({
                     idNamePairs: store.idNamePairs,
                     currentList: null,
+                    deleteListPair: payload,
                     newListCounter: store.newListCounter,
                     listNameActive: false
                 });
@@ -145,6 +148,58 @@ export const useGlobalStore = () => {
         }
         asyncChangeListName(id);
     }
+
+    // THIS FUNCTION MARKS THE DELETION OF A LIST & PROMPTS THE CUSTOMER FOR CONFIRMATION
+    store.markListForDeletion = function (idNamePair) {
+        storeReducer({
+            type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
+            payload: idNamePair
+        })
+        // MAKE THE MODAL VISIBLE TO DISPLAY TO THE USER
+        document.getElementById("delete-list-modal").classList.add("is-visible");
+    }
+
+    // THIS FUNCTION CLOSES THE MODAL & HIDES THE MODAL FROM THE CUSTOMER 
+    store.closeDeleteListModal = function (){
+        storeReducer({
+            type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
+            payload: {}
+        })
+        // HIDE THE MODAL FROM THE USER. 
+        document.getElementById("delete-list-modal").classList.remove("is-visible");
+    }
+
+    // THIS FUNCTION IS FOR DELETEING THE LIST MARKED & HIDES THE MODAL FROM THE USER. 
+    store.deleteList = function () {
+        async function deleteList (id) {
+            console.log("DELETE THE LIST WITH THE FOLLOWING ID: ", id);
+            let response = await api.deletePlaylist(id);
+            if (response.data.success) {
+                console.log("PLAYLIST DELETED SUCESSFULLY!")
+                async function getListPairs(playlist) {
+                    response = await api.getPlaylistPairs();
+                    if (response.data.success) {
+                        let pairsArray = response.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.CHANGE_LIST_NAME,
+                            payload: {
+                                idNamePairs: pairsArray,
+                                playlist: {}
+                            }
+                        });
+                    }
+                }
+                getListPairs();  
+            }
+            else {
+                console.log("API FAILED TO DELETE THE PLAYLIST!");
+            }
+        }
+        deleteList(store.deleteListPair._id);
+        // HIDE THE MODAL FROM THE USER. 
+        document.getElementById("delete-list-modal").classList.remove("is-visible");
+    }
+
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {

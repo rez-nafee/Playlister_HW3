@@ -5,6 +5,7 @@ const Playlist = require('../models/playlist-model')
     functions for each endpoint.
     
     @author McKilla Gorilla
+    @author Rezvan Nafee 
 */
 createPlaylist = (req, res) => {
     const body = req.body;
@@ -56,13 +57,34 @@ updatePlaylistName = async (req, res) => {
         .save()
         .then(() => {
             console.log("SAVED THE LIST!")
-            return res.status(201).json({
+            return res.status(400).json({
                 success: true,
                 playlist: list,
                 message: 'Playlist Name Updated!',
             })
         })
     }).catch(err => console.log(err))  
+}
+
+deletePlayliyById = async (req,res) => {
+    console.log(req.body)
+    await Playlist.findByIdAndDelete({ _id: req.body.id }, (err,list) => {
+        // IF THERE WAS AN ERROR ENCOUNTERED WHILE SEARCHING FOR THE ID, RETURN A BAD RESPONSE. 
+        if (err) {
+            console.log("COULDN'T DELETE PLAYLIST!")
+            return res.status(400).json({
+                success: false,
+                message: "FAILED: COULDN'T DELETE PLAYLIST."
+            })
+        }
+        // IF THERE WASN'T AN ERROR ENCOUNTERED WHILE SEARCHING FOR THE ID, RETURN A SUCCESSFUL RESPONSE. 
+        console.log("PLAYLIST DELETED SUCCESSFULLY!")
+        return res.status(200).json({
+            success: true,
+            playlist: list, 
+            message: "SUCESS: DELETED PLAYLIST!",
+        })
+    }).catch(err => console.log(req.body)) 
 }
  
 getPlaylistById = async (req, res) => {
@@ -120,5 +142,6 @@ module.exports = {
     getPlaylists,
     getPlaylistPairs,
     getPlaylistById,
-    updatePlaylistName
+    updatePlaylistName,
+    deletePlayliyById
 }
