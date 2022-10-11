@@ -1,8 +1,11 @@
 import { createContext, useState } from 'react'
 import jsTPS from '../common/jsTPS'
 import api from '../api'
+
 import AddSong_Transaction from '../transactions/AddSong_Transaction';
 import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction';
+import UpdateSong_Transaction from '../transactions/UpdateSong_Transaction';
+
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
@@ -22,7 +25,8 @@ export const GlobalStoreActionType = {
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
     MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
-    MARK_SONG_FOR_REMOVAL: "MARK_SONG_FOR_REMOVAL"
+    MARK_SONG_FOR_REMOVAL: "MARK_SONG_FOR_REMOVAL",
+    MARK_SONG_FOR_UPDATE: "MARK_SONG_FOR_UPDATE"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -38,6 +42,7 @@ export const useGlobalStore = () => {
         newListCounter: 0,
         deleteListPair: null,
         removeSongPair: null,
+        updateSongPair: null, 
         listNameActive: false
     });
 
@@ -117,6 +122,14 @@ export const useGlobalStore = () => {
                     newListCounter: store.newListCounter,
                     currentList: store.currentList
 
+                });
+            }
+            case GlobalStoreActionType.MARK_SONG_FOR_UPDATE: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    updateSongPair: payload,
+                    newListCounter: store.newListCounter,
+                    currentList: store.currentList
                 });
             }
             default:
@@ -386,7 +399,7 @@ export const useGlobalStore = () => {
         document.getElementById("remove-song-modal").classList.remove("is-visible");
     }
     // THIS FUNCTION IS FOR REMOVING THE MARKED SONG FROM THE LIST
-    store.removeSong = function (){
+    store.removeSong = function (position){
         async function removeSongFromPlaylist(id, position){
             // SEND A REQUEST TO OUR SERVER TO REMOVE THE SONG FROM THE PLAYLIST WITH THE SPECIFIED ID AND POSITION 
             let response = await api.removeSong(id, position);
@@ -403,7 +416,7 @@ export const useGlobalStore = () => {
                 }
             }
         }
-        removeSongFromPlaylist(store.currentList._id,store.removeSongPair.position)
+        removeSongFromPlaylist(store.currentList._id, position)
         // HIDE THE MODAL FOR REMOVING THE SONG. 
         document.getElementById("remove-song-modal").classList.remove("is-visible");
     }
@@ -433,6 +446,65 @@ export const useGlobalStore = () => {
         tps.addTransaction(transaction);
     }
 // FUNCTIONS FOR HANDLING UPDATING THE SONG'S TEXT 
+    //THIS IS A FUNCTION THAT MARKS THE SONG THAT THE USER WOULD LIKE TO UPDATE AND PROMPTS THEM WITH THE UPDATE MODAL
+    store.markSongForUpdating = function (song, position){
+        let pair = {
+            song: song,
+            position: position
+        } 
+        console.log(pair)
+        storeReducer({
+            type: GlobalStoreActionType.MARK_SONG_FOR_UPDATE,
+            payload: pair
+        });
+        // SHOW THE MODAL FOR THE CONFIRMATION OF UPDATING THE SONG. 
+        document.getElementById("update-song-modal").classList.add("is-visible");
+        // GRAB THE MODAL'S INPUT FIELDS
+        let title = document.getElementById("update-song-input-title")
+        let artist = document.getElementById("update-song-input-artist")
+        let youTubeId = document.getElementById("update-song-input-youTubeId")
+        // SET THE VALUES OF THE INPUTS
+        title.value = song.title
+        artist.value = song.artist
+        youTubeId.value = song.youTubeId
+    }
+    // THIS IS A FUCNTION FOR CLOSING THE UPDATE SONG MODAL
+    store.closeUpdateSongModal = function (){
+        // HIDE THE MODAL FOR THE CONFIRMATION OF UPDATING THE SONG. 
+        document.getElementById("update-song-modal").classList.remove("is-visible");
+        // GRAB THE MODAL'S INPUT FIELDS
+        let title = document.getElementById("update-song-input-title")
+        let artist = document.getElementById("update-song-input-artist")
+        let youTubeId = document.getElementById("update-song-input-youTubeId")
+        // SET THE VALUES OF THE INPUTS
+        title.value = ""
+        artist.value = ""
+        youTubeId.value = ""
+    }
+    // THIS IS A FUNCTION THAT UPDATES THE SONG IN THE CURRENT LIST IN THE DATABSE
+    store.updateSong = function (song, position){
+        async function updateSong(id, song, position) {
+            let response = await api.updateSong(id, song, position)
+            if(response.data.success){
+                // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
+                let playlist = response.data.playlist;
+                if (response.data.success) {
+                    // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                    store.closeUpdateSongModal();
+                }
+            }
+        }
+        updateSong(store.currentList._id, song, position)
+    }
+
+    store.updateSongTransaction = function(newSong) {
+        let transaction = new UpdateSong_Transaction(this, store.updateSongPair.song, newSong, store.updateSongPair.position)
+        tps.addTransaction(transaction)
+    }
 
     store.getPlaylistSize = function() {
         return store.currentList.songs.length;

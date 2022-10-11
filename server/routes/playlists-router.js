@@ -16,6 +16,7 @@ router.post('/playlist', PlaylistController.createPlaylist)
 router.put('/updatePlaylistName', PlaylistController.updatePlaylistName)
 router.put('/addNewSong', PlaylistController.addNewSong)
 router.put('/addRemovedSong', PlaylistController.addRemovedSong)
+router.put('/updateSong', PlaylistController.updateSong)
 
 // DELETE METHODS FOR REMOVING DOCUMENTS FROM THE DATABASE 
 router.delete('/deletePlaylist', PlaylistController.deletePlayliyById)

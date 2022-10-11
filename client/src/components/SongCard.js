@@ -11,12 +11,31 @@ function SongCard(props) {
         store.markSongForRemoval(song,index)
     }
 
+   const handleClick = (event) => {
+    console.log(event.detail);
+    switch(event.detail){
+        case 1: {
+            console.log("clicked on me once")
+            break
+        }
+        case 2: {
+            console.log("clicked on me twice")
+            store.markSongForUpdating(song,index)
+            break
+        }
+        default:{
+            break;
+        }
+    }
+   }
+
     let cardClass = "list-card unselected-list-card";
     return (
         <div
             key={index}
             id={'song-' + index + '-card'}
             className={cardClass}
+            onClick = {handleClick}
         >
             {index + 1}.
             <a

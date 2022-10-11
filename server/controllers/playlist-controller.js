@@ -144,8 +144,7 @@ getPlaylistPairs = async (req, res) => {
 
 // ADDING A NEW SONG TO THE LIST. 
 addNewSong = async (req, res) => {
-    console.log("We will be adding a song to a list with an ID of: ", req.body.id)
-    console.log("Song to add: ", req.body.song)
+    console.log("Adding new song...")
     await Playlist.findOne({ _id: req.body.id }, (err, list) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
@@ -156,18 +155,19 @@ addNewSong = async (req, res) => {
         list
         .save()
         .then(() => {
-            console.log("ADDED THE NEW SONG!")
+            console.log("ADDED A NEW SONG!")
             return res.status(200).json({
                 success: true,
                 playlist: list,
-                message: 'ADDED THE NEW SONG!',
+                message: 'ADDED A NEW SONG!',
             })
         })
     }).catch(err => console.log(err))
 }
+
 // REMOVING THE NEWLY ADDED SONG FROM THE LIST
 removeNewSong = async (req,res) => {
-    console.log("We will be removing a newly added song from list with an ID of: ", req.body.id)
+    console.log("Removing newly added song...")
     await Playlist.findOne({ _id: req.body.id }, (err, list) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
@@ -188,7 +188,9 @@ removeNewSong = async (req,res) => {
     }).catch(err => console.log(err))
 }
 
+// REMOVING A SONG AT A SPECIFIED POSITION 
 removeSong = async (req,res) => {
+    console.log("Removing song...")
     await Playlist.findOne({ _id: req.body.id }, (err, list) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
@@ -203,20 +205,18 @@ removeSong = async (req,res) => {
         list
         .save()
         .then(() => {
-            console.log("REMOVED THE SPECIFIED SONG!")
+            console.log("REMOVED SPECIFIED SONG!")
             return res.status(200).json({
                 success: true,
                 playlist: list,
-                message: "REMOVED THE SPECIFIED SONG!",
+                message: "REMOVED SPECIFIED SONG!",
             })
         })
     }).catch(err => console.log(err))
 }
-
+// FUNCTION FOR ADDING BACK A REMOVED SONG AT A SPECIFIED POSITION
 addRemovedSong = async (req, res) => {
     console.log("Adding removed song...")
-    console.log("Song that needs to be re-added: ", req.body.song)
-    console.log("Song needs to be added at position: ", req.body.position)
     await Playlist.findOne({ _id: req.body.id }, (err, list) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
@@ -231,15 +231,42 @@ addRemovedSong = async (req, res) => {
         list
         .save()
         .then(() => {
-            console.log("ADDED THE REMOVED SONG!")
+            console.log("ADDED REMOVED SONG!")
             return res.status(200).json({
                 success: true,
                 playlist: list,
-                message: "ADDED THE REMOVED SONG!",
+                message: "ADDED REMOVED SONG!",
             })
         })
     }).catch(err => console.log(err))
 }
+
+updateSong = async (req, res) => {
+    console.log("Updating song...")
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // MAKE A COPY OF THE SONGS WE CURRENTLY HAVE IN THE LIST
+        var songs = [...list.songs]
+        // START AT THE SPECIFIED INDEX, REMOVE THE SONG, AND ADD ONE SONG! 
+        songs.splice(req.body.position,1,req.body.song)
+        // UPDATE THE SONGS WITHIN THE LIST 
+        list.songs = songs
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("UPDATED THE SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: "UPDATED THE SONG!",
+            })
+        })
+    }).catch(err => console.log(err))
+}
+
 
 module.exports = {
     createPlaylist,
@@ -251,5 +278,6 @@ module.exports = {
     addNewSong,
     removeNewSong,
     removeSong,
-    addRemovedSong
+    addRemovedSong,
+    updateSong
 }

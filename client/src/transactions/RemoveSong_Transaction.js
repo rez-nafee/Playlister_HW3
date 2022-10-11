@@ -9,7 +9,7 @@ export default class RemoveSong_Transaction extends jsTPS_Transaction{
     }
 
     doTransaction() {
-        this.store.removeSong();
+        this.store.removeSong(this.position);
     }
 
     undoTransaction() {
