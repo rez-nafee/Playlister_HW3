@@ -57,7 +57,7 @@ updatePlaylistName = async (req, res) => {
         .save()
         .then(() => {
             console.log("SAVED THE LIST!")
-            return res.status(400).json({
+            return res.status(200).json({
                 success: true,
                 playlist: list,
                 message: 'Playlist Name Updated!',
@@ -111,14 +111,18 @@ getPlaylists = async (req, res) => {
 }
 
 getPlaylistPairs = async (req, res) => {
+    console.log("looking for playlists....")
     await Playlist.find({}, (err, playlists) => {
         if (err) {
+            console.log(err)
             return res.status(400).json({ success: false, error: err})
         }
         if (!playlists.length) {
+            console.log("no lists found!")
+            let pairs = [];
             return res
-                .status(404)
-                .json({ success: false, error: 'Playlists not found'})
+                .status(204)
+                .json({ success: true, idNamePairs: pairs})
         }
         else {
             // PUT ALL THE LISTS INTO ID, NAME PAIRS
@@ -131,7 +135,7 @@ getPlaylistPairs = async (req, res) => {
                 };
                 pairs.push(pair);
             }
-            return res.status(200).json({ success: true, idNamePairs: pairs })
+            return res.status(200).json({ success: true, idNamePairs: pairs})
         }
     }).catch(err => console.log(err))
 }
