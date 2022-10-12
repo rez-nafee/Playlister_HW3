@@ -5,6 +5,7 @@ import api from '../api'
 import AddSong_Transaction from '../transactions/AddSong_Transaction';
 import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction';
 import UpdateSong_Transaction from '../transactions/UpdateSong_Transaction';
+import MoveSong_Transaction from '../transactions/MoveSong_Transaction';
 
 export const GlobalStoreContext = createContext({});
 /*
@@ -26,7 +27,7 @@ export const GlobalStoreActionType = {
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
     MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
     MARK_SONG_FOR_REMOVAL: "MARK_SONG_FOR_REMOVAL",
-    MARK_SONG_FOR_UPDATE: "MARK_SONG_FOR_UPDATE"
+    MARK_SONG_FOR_UPDATE: "MARK_SONG_FOR_UPDATE",
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -42,7 +43,7 @@ export const useGlobalStore = () => {
         newListCounter: 0,
         deleteListPair: null,
         removeSongPair: null,
-        updateSongPair: null, 
+        updateSongPair: null,
         listNameActive: false
     });
 
@@ -504,6 +505,40 @@ export const useGlobalStore = () => {
     store.updateSongTransaction = function(newSong) {
         let transaction = new UpdateSong_Transaction(this, store.updateSongPair.song, newSong, store.updateSongPair.position)
         tps.addTransaction(transaction)
+    }
+
+// FUNCTION FOR MOVING A SONG BY DRAGGING IT AROUND
+    store.moveSongs = function (startPair, endPair) {
+        async function moveSong(id, startPair, endPair){
+            let response = await api.moveSong(id, startPair.song, startPair.position, endPair.song, endPair.position);
+            if(response.data.success){
+                // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
+                let playlist = response.data.playlist;
+                if (response.data.success) {
+                    // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
+                    storeReducer({
+                        type: GlobalStoreActionType.SET_CURRENT_LIST,
+                        payload: playlist
+                    });
+                }
+            }
+        }
+        moveSong(store.currentList._id, startPair, endPair);
+    }
+
+    store.moveSongTransaction= function (startIndex, endIndex) {
+        let startSongPair = {
+            song: store.currentList.songs[startIndex],
+            position: startIndex
+        }
+        let endSongPair = {
+            song: store.currentList.songs[endIndex],
+            position: endIndex
+        }
+        console.log("Start Song Pair: ", startSongPair)
+        console.log("End Song Pair: ", endSongPair)
+        let transaction = new MoveSong_Transaction(this, startSongPair, endSongPair)
+        tps.addTransaction(transaction);
     }
 
     store.getPlaylistSize = function() {

@@ -267,6 +267,35 @@ updateSong = async (req, res) => {
     }).catch(err => console.log(err))
 }
 
+moveSong = async (req, res) => {
+    console.log("Moving Song...")
+    await Playlist.findOne({ _id: req.body.id }, (err, list) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+        // MAKE A COPY OF THE SONGS WE CURRENTLY HAVE IN THE LIST
+        var songs = [...list.songs]
+        // MAKE A TEMP VARIABLE TO HOLD THE SONG WE ARE MOVING TO
+        var tempSong = req.body.endSong
+        // SWAP PLACES 
+        songs[req.body.endPosition] = req.body.startSong
+        songs[req.body.startPosition] = tempSong 
+        // UPDATE THE SONGS WITHIN THE LIST 
+        list.songs = songs
+        // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
+        list
+        .save()
+        .then(() => {
+            console.log("MOVED THE SONG!")
+            return res.status(200).json({
+                success: true,
+                playlist: list,
+                message: "MOVED THE SONG!",
+            })
+        })
+    }).catch(err => console.log(err))
+} 
+
 
 module.exports = {
     createPlaylist,
@@ -279,5 +308,6 @@ module.exports = {
     removeNewSong,
     removeSong,
     addRemovedSong,
-    updateSong
+    updateSong,
+    moveSong
 }

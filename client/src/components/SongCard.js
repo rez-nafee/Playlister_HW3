@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, {useContext, useEffect, useState } from 'react'
 import { GlobalStoreContext } from '../store'
 
 function SongCard(props) {
@@ -29,6 +29,22 @@ function SongCard(props) {
     }
    }
 
+   const handleDragStart = (event) => {
+    console.log("Drag started at: ", song)
+    event.dataTransfer.setData("drag-start-song", event.target.id)
+   }
+
+   const handleDrop = (event) => {
+    event.preventDefault()
+    console.log("Drag started from: ", event.dataTransfer.getData("drag-start-song").match((/(\d+)/))[0])
+    console.log("Drag ended from: ", event.target.id.match((/(\d+)/))[0])
+    store.moveSongTransaction(event.dataTransfer.getData("drag-start-song").match((/(\d+)/))[0], event.target.id.match((/(\d+)/))[0])
+   }
+
+   const handleDragOver = (event) => {
+    event.preventDefault();
+   }
+
     let cardClass = "list-card unselected-list-card";
     return (
         <div
@@ -36,6 +52,10 @@ function SongCard(props) {
             id={'song-' + index + '-card'}
             className={cardClass}
             onClick = {handleClick}
+            onDragStart = {handleDragStart}
+            onDragOver = {handleDragOver}
+            onDrop = {handleDrop}
+            draggable = {true}
         >
             {index + 1}.
             <a

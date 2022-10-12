@@ -33,6 +33,7 @@ export const removeNewSong = (id) => api.delete('/removeNewSong', {data: {id : i
 export const removeSong = (id, position) => api.delete('/removeSong', {data: {id : id, position: position}})
 export const addRemovedSong = (song,position,id) => api.put('/addRemovedSong', {song,position,id})
 export const updateSong  = (id, song, position) => api.put('/updateSong', {id,song,position})
+export const moveSong = (id, startSong, startPosition, endSong, endPosition) => api.put('/moveSong', {id,startSong,startPosition,endSong,endPosition})
 
 const apis = {
     getAllPlaylists,
@@ -45,7 +46,8 @@ const apis = {
     removeNewSong,
     removeSong,
     addRemovedSong,
-    updateSong
+    updateSong,
+    moveSong
 }
 
 export default apis
