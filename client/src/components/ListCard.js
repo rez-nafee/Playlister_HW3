@@ -80,18 +80,18 @@ function ListCard(props) {
             <input
                     disabled={cardStatus}
                     type="button"
-                    id={"delete-list-" + idNamePair._id}
-                    className="list-card-button"
-                    onClick = {handleDeleteList}
-                    value={"\u2715"}
-                />
-                <input
-                    disabled={cardStatus}
-                    type="button"
                     id={"edit-list-" + idNamePair._id}
                     className="list-card-button"
                     onClick={handleToggleEdit}
                     value={"\u270E"}
+                />
+            <input
+                    disabled={cardStatus}
+                    type="button"
+                    id={"delete-list-" + idNamePair._id}
+                    className="list-card-button"
+                    onClick = {handleDeleteList}
+                    value={"\u2715"}
                 />
             </div>
         </div>;

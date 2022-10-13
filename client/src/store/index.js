@@ -283,10 +283,6 @@ export const useGlobalStore = () => {
                         type: GlobalStoreActionType.CREATE_NEW_LIST,
                         payload: playlist
                     });
-                    storeReducer({
-                        type: GlobalStoreActionType.SET_CURRENT_LIST,
-                        payload: playlist
-                    });
                     store.history.push("/playlist/" + playlist._id);
                 }
             }
@@ -510,10 +506,13 @@ export const useGlobalStore = () => {
 // FUNCTION FOR MOVING A SONG BY DRAGGING IT AROUND
     store.moveSongs = function (startPair, endPair) {
         async function moveSong(id, startPair, endPair){
-            let response = await api.moveSong(id, startPair.song, startPair.position, endPair.song, endPair.position);
+            console.log("Swap start: ", startPair)
+            console.log("Swap end: ", endPair)
+            let response = await api.moveSong(id, startPair.song, parseInt(startPair.position), endPair.song, parseInt(endPair.position));
             if(response.data.success){
                 // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
                 let playlist = response.data.playlist;
+                console.log(playlist.songs)
                 if (response.data.success) {
                     // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
                     storeReducer({
@@ -537,8 +536,11 @@ export const useGlobalStore = () => {
         }
         console.log("Start Song Pair: ", startSongPair)
         console.log("End Song Pair: ", endSongPair)
-        let transaction = new MoveSong_Transaction(this, startSongPair, endSongPair)
-        tps.addTransaction(transaction);
+        if(startSongPair.position != endSongPair.position){
+            console.log("making move song transaction...")
+            let transaction = new MoveSong_Transaction(this, startSongPair, endSongPair)
+            tps.addTransaction(transaction);
+        }
     }
 
     store.getPlaylistSize = function() {

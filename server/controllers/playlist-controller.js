@@ -66,7 +66,7 @@ updatePlaylistName = async (req, res) => {
     }).catch(err => console.log(err))  
 }
 
-deletePlayliyById = async (req,res) => {
+deletePlaylistyById = async (req,res) => {
     await Playlist.findByIdAndDelete({ _id: req.body.id }, (err,list) => {
         // IF THERE WAS AN ERROR ENCOUNTERED WHILE SEARCHING FOR THE ID, RETURN A BAD RESPONSE. 
         if (err) {
@@ -269,18 +269,31 @@ updateSong = async (req, res) => {
 
 moveSong = async (req, res) => {
     console.log("Moving Song...")
+    console.log("Start Song: ", req.body.startSong.title)
+    console.log("End Song: ", req.body.endSong.title)
+    console.log(req.body)
     await Playlist.findOne({ _id: req.body.id }, (err, list) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
         // MAKE A COPY OF THE SONGS WE CURRENTLY HAVE IN THE LIST
         var songs = [...list.songs]
-        // MAKE A TEMP VARIABLE TO HOLD THE SONG WE ARE MOVING TO
-        var tempSong = req.body.endSong
-        // SWAP PLACES 
-        songs[req.body.endPosition] = req.body.startSong
-        songs[req.body.startPosition] = tempSong 
-        // UPDATE THE SONGS WITHIN THE LIST 
+        var start = req.body.startPosition
+        var end = req.body.endPosition
+        if (start < end) {
+            let temp = songs[start];
+            for (let i = start; i < end; i++) {
+                songs[i] = songs[i + 1];
+            }
+            songs[end] = temp;
+        }
+        else if (start > end) {
+            let temp = songs[start];
+            for (let i = start; i > end; i--) {
+                songs[i] = songs[i - 1];
+            }
+            songs[end] = temp;
+        }
         list.songs = songs
         // SAVE THE LIST AND RETURN A SUCCESSFUL RESPONSE
         list
@@ -303,7 +316,7 @@ module.exports = {
     getPlaylistPairs,
     getPlaylistById,
     updatePlaylistName,
-    deletePlayliyById,
+    deletePlaylistyById,
     addNewSong,
     removeNewSong,
     removeSong,
