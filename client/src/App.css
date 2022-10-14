@@ -167,6 +167,13 @@ input {
   font-size:20pt;
 }
 
+input:disabled{
+  background-color: lightgray;
+  opacity: 0.25;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
 .disabled {
   background-color: lightgray;
 }
@@ -270,11 +277,11 @@ span {
 }
 
 #delete-list-modal-center-content {
-  font-size: 28pt;
+  font-size: 25pt;
 }
 
 #remove-song-modal-center-content{
-  font-size: 28pt;
+  font-size: 25pt;
 }
 
 #title-prompt {

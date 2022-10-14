@@ -32,6 +32,20 @@ const ListSelector = () => {
             />
         ))
     }
+
+    // Check if the list is currently being editted. 
+    let cardStatus = false;
+    console.log(store)
+    if (store.listNameActive) {
+        console.log("A LIST IS BEING EDITTED!")
+        cardStatus = true;
+    }
+
+    // Check if there is a list that is currently being marked for deletion
+    if (store.deleteListPair){
+        cardStatus = true;
+    }
+
     return (
         <div id="playlist-selector">
             <div id="list-selector-list">
@@ -41,6 +55,7 @@ const ListSelector = () => {
                     id="add-list-button"
                     onClick={handleCreateNewList}
                     className="playlister-button"
+                    disabled = {cardStatus}
                     value="+" />
                     &nbsp;Your Lists
             </div>                {

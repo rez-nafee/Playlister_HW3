@@ -28,6 +28,10 @@ export const GlobalStoreActionType = {
     MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
     MARK_SONG_FOR_REMOVAL: "MARK_SONG_FOR_REMOVAL",
     MARK_SONG_FOR_UPDATE: "MARK_SONG_FOR_UPDATE",
+    CAN_UNDO : "CAN_UNDO",
+    CAN_REDO : "CAN_REDO",
+    IS_SONG_MODAL_OPEN: "IS_SONG_MODAL_OPEN",
+    IS_LIST_DELETE_MODAL_OPEN: "IS_LIST_DELETE_MODAL_OPEN"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -44,7 +48,11 @@ export const useGlobalStore = () => {
         deleteListPair: null,
         removeSongPair: null,
         updateSongPair: null,
-        listNameActive: false
+        isModalOpen: false,
+        canUndo: false, 
+        canRedo: false, 
+        listNameActive: false,
+        tps: tps
     });
 
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
@@ -111,9 +119,9 @@ export const useGlobalStore = () => {
             case GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE: {
                 return setStore({
                     idNamePairs: store.idNamePairs,
-                    currentList: payload,
+                    currentList: null,
                     newListCounter: store.newListCounter,
-                    listNameActive: true
+                    listNameActive: payload
                 });
             }
             case GlobalStoreActionType.MARK_SONG_FOR_REMOVAL: {
@@ -129,6 +137,22 @@ export const useGlobalStore = () => {
                 return setStore({
                     idNamePairs: store.idNamePairs,
                     updateSongPair: payload,
+                    newListCounter: store.newListCounter,
+                    currentList: store.currentList
+                });
+            }
+            case GlobalStoreActionType.CAN_UNDO: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    canUndo: payload,
+                    newListCounter: store.newListCounter,
+                    currentList: store.currentList
+                });
+            }
+            case GlobalStoreActionType.CAN_REDO: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    canRedo: payload,
                     newListCounter: store.newListCounter,
                     currentList: store.currentList
                 });
@@ -163,6 +187,10 @@ export const useGlobalStore = () => {
                                 let pairsArray = response.data.idNamePairs;
                                 console.log(pairsArray)
                                 storeReducer({
+                                    type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
+                                    payload: false
+                                });
+                                storeReducer({
                                     type: GlobalStoreActionType.CHANGE_LIST_NAME,
                                     payload: {
                                         idNamePairs: pairsArray,
@@ -177,7 +205,14 @@ export const useGlobalStore = () => {
                 updateListName(playlist, newName);
             }
         }
-        asyncChangeListName(id);
+        if(newName)
+            asyncChangeListName(id);
+        else{
+            storeReducer({
+                type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
+                payload: false
+            });
+        }
     }
 
     // THIS FUNCTION MARKS THE DELETION OF A LIST & PROMPTS THE CUSTOMER FOR CONFIRMATION
@@ -195,7 +230,7 @@ export const useGlobalStore = () => {
         tps.clearAllTransactions();
         storeReducer({
             type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
-            payload: {}
+            payload: null
         })
         // HIDE THE MODAL FROM THE USER. 
         document.getElementById("delete-list-modal").classList.remove("is-visible");
@@ -233,6 +268,11 @@ export const useGlobalStore = () => {
         deleteList(store.deleteListPair._id);
         // HIDE THE MODAL FROM THE USER. 
         document.getElementById("delete-list-modal").classList.remove("is-visible");
+        // UPDATE THE LIST MAKRED FOR DELETION
+        storeReducer({
+            type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
+            payload: {}
+        })
         // CLEAR ALL TRANSACTIONS FROM THE TRANSACTION STACK
         tps.clearAllTransactions();
     }
@@ -405,6 +445,11 @@ export const useGlobalStore = () => {
                 let playlist = response.data.playlist;
                 console.log(playlist)
                 if (response.data.success) {
+                    // UPDATE THE REMOVE SONG PAIR
+                    storeReducer({
+                        type: GlobalStoreActionType.MARK_SONG_FOR_REMOVAL,
+                        payload: null
+                    });
                     //UPDATE THE CURRENT LIST 
                     storeReducer({
                         type: GlobalStoreActionType.SET_CURRENT_LIST,
@@ -477,6 +522,11 @@ export const useGlobalStore = () => {
         title.value = ""
         artist.value = ""
         youTubeId.value = ""
+        // UPDATE THE SONG THAT WAS MARKED FOR UPDATE. 
+        storeReducer({
+            type: GlobalStoreActionType.MARK_SONG_FOR_UPDATE,
+            payload: null
+        });
     }
     // THIS IS A FUNCTION THAT UPDATES THE SONG IN THE CURRENT LIST IN THE DATABSE
     store.updateSong = function (song, position){
@@ -486,6 +536,11 @@ export const useGlobalStore = () => {
                 // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
                 let playlist = response.data.playlist;
                 if (response.data.success) {
+                    // UPDATE THE MOVE SONG PAIR
+                    storeReducer({
+                        type: GlobalStoreActionType.MARK_SONG_FOR_UPDATE,
+                        payload: null
+                    });
                     // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
                     storeReducer({
                         type: GlobalStoreActionType.SET_CURRENT_LIST,
@@ -547,6 +602,14 @@ export const useGlobalStore = () => {
         return store.currentList.songs.length;
     }
 
+    store.canUndo = function () {
+        return tps.hasTransactionToUndo()
+    }
+
+    store.canRedo = function () {
+        return tps.hasTransactionToRedo()
+    }
+
     store.undo = function () {
         tps.undoTransaction();
     }
@@ -559,7 +622,7 @@ export const useGlobalStore = () => {
     store.setIsListNameEditActive = function () {
         storeReducer({
             type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
-            payload: null
+            payload: true
         });
     }
 

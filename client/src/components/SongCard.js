@@ -11,6 +11,13 @@ function SongCard(props) {
         store.markSongForRemoval(song,index)
     }
 
+    // DISABLED STATUS FOR THE BUTTON IF THERE IS A SONG THAT IS CURRENTLY BEING UPDATED OR REMOVED
+    let disabled = false; 
+    if (store.removeSongPair || store.updateSongPair){
+        disabled = true;
+    }
+
+
    const handleClick = (event) => {
     console.log(event.detail);
     switch(event.detail){
@@ -71,6 +78,7 @@ function SongCard(props) {
                 id={"remove-song-" + index}
                 className="list-card-button"
                 onClick={handleRemoveSong}
+                disabled = {disabled}
                 value={"\u2715"}
             />
         </div>

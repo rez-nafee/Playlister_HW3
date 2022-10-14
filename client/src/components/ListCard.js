@@ -7,13 +7,14 @@ import { GlobalStoreContext } from '../store'
     name or deleting it.
     
     @author McKilla Gorilla
+    @author Rezvan Nafee
 */
 function ListCard(props) {
     const { store } = useContext(GlobalStoreContext);
     const [ editActive, setEditActive ] = useState(false);
-    const [ text, setText ] = useState("");
     store.history = useHistory();
     const { idNamePair, selected } = props;
+    const [ text, setText ] = useState(idNamePair.name);
 
     function handleLoadList(event) {
         if (!event.target.disabled) {
@@ -27,7 +28,6 @@ function ListCard(props) {
     }
 
     function handleDeleteList(){
-        console.log("MARKING SONG FOR DELETION...")
         store.markListForDeletion(idNamePair)
     }
 
@@ -48,20 +48,25 @@ function ListCard(props) {
         if (event.code === "Enter") {
             let id = event.target.id.substring("list-".length);
             console.log(id)
+            console.log(text)
             store.changeListName(id, text);
             toggleEdit();
         }
     }
+
     function handleUpdateText(event) {
         setText(event.target.value );
     }
+
 
     let selectClass = "unselected-list-card";
     if (selected) {
         selectClass = "selected-list-card";
     }
+
+    // Check if the list is currently being editted. 
     let cardStatus = false;
-    if (store.isListNameEditActive) {
+    if (store.listNameActive || store.deleteListPair)  {
         cardStatus = true;
     }
     let cardElement =
@@ -76,7 +81,7 @@ function ListCard(props) {
                 className="list-card-text">
                 {idNamePair.name}
             </span>
-            <div className='card-buttons'>
+            <div className='card-buttons' id = "list-btns">
             <input
                     disabled={cardStatus}
                     type="button"
