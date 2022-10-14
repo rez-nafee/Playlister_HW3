@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import SongCard from './SongCard.js'
 import { GlobalStoreContext } from '../store'
@@ -7,10 +7,32 @@ import { GlobalStoreContext } from '../store'
     happens when we are on the proper route.
     
     @author McKilla Gorilla
+    @author Rezvan Nafee
 */
 function PlaylistCards() {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
+
+    console.log(store)
+
+    const handleKeyPress = useCallback((event) => {
+        if(event.key.toString().toLowerCase() === 'z' && (event.ctrlKey || event.metaKey)){
+            store.undo()
+        }
+        if(event.key.toString().toLowerCase() === 'y' && (event.ctrlKey || event.metaKey)){
+            store.redo()
+        }
+    }) 
+
+    useEffect(() => {
+        // Add the event listener to the document
+        document.addEventListener('keydown', handleKeyPress)
+
+        // Remove the event listener
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress)
+        }
+    }, [handleKeyPress])
 
     return (
         <div id="playlist-cards">

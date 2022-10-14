@@ -66,7 +66,8 @@ export const useGlobalStore = () => {
                     idNamePairs: payload.idNamePairs,
                     currentList: null,
                     newListCounter: store.newListCounter,
-                    listNameActive: false
+                    listNameActive: false,
+                    tps: tps
                 });
             }
             // STOP EDITING THE CURRENT LIST
@@ -75,7 +76,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     currentList: null,
                     newListCounter: store.newListCounter,
-                    listNameActive: false
+                    listNameActive: false,
+                    transaction: tps
                 })
             }
             // CREATE A NEW LIST
@@ -84,7 +86,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     currentList: payload,
                     newListCounter: store.newListCounter + 1,
-                    listNameActive: false
+                    listNameActive: false,
+                    transaction: tps
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
@@ -93,7 +96,8 @@ export const useGlobalStore = () => {
                     idNamePairs: payload,
                     currentList: null,
                     newListCounter: store.newListCounter,
-                    listNameActive: false
+                    listNameActive: false,
+                    transaction: tps
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -103,7 +107,8 @@ export const useGlobalStore = () => {
                     currentList: null,
                     deleteListPair: payload,
                     newListCounter: store.newListCounter,
-                    listNameActive: false
+                    listNameActive: false,
+                    transaction: tps
                 });
             }
             // UPDATE A LIST
@@ -112,7 +117,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     currentList: payload,
                     newListCounter: store.newListCounter,
-                    listNameActive: false
+                    listNameActive: false,
+                    transaction: tps
                 });
             }
             // START EDITING A LIST NAME
@@ -121,7 +127,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     currentList: null,
                     newListCounter: store.newListCounter,
-                    listNameActive: payload
+                    listNameActive: payload,
+                    transaction: tps
                 });
             }
             case GlobalStoreActionType.MARK_SONG_FOR_REMOVAL: {
@@ -129,8 +136,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     removeSongPair: payload,
                     newListCounter: store.newListCounter,
-                    currentList: store.currentList
-
+                    currentList: store.currentList,
+                    transaction: tps
                 });
             }
             case GlobalStoreActionType.MARK_SONG_FOR_UPDATE: {
@@ -138,7 +145,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     updateSongPair: payload,
                     newListCounter: store.newListCounter,
-                    currentList: store.currentList
+                    currentList: store.currentList,
+                    transaction: tps
                 });
             }
             case GlobalStoreActionType.CAN_UNDO: {
@@ -146,7 +154,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     canUndo: payload,
                     newListCounter: store.newListCounter,
-                    currentList: store.currentList
+                    currentList: store.currentList,
+                    transaction: tps
                 });
             }
             case GlobalStoreActionType.CAN_REDO: {
@@ -154,7 +163,8 @@ export const useGlobalStore = () => {
                     idNamePairs: store.idNamePairs,
                     canRedo: payload,
                     newListCounter: store.newListCounter,
-                    currentList: store.currentList
+                    currentList: store.currentList,
+                    transaction: tps
                 });
             }
             default:
