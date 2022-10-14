@@ -545,22 +545,18 @@ export const useGlobalStore = () => {
             if(response.data.success){
                 // IF WE GET A SUCCESSFUL RESPONSE FROM THE SERVER, THEN WE CAN UPDATE THE CURRENT LIST
                 let playlist = response.data.playlist;
+                console.log(playlist)
                 if (response.data.success) {
-                    // UPDATE THE MOVE SONG PAIR
-                    storeReducer({
-                        type: GlobalStoreActionType.MARK_SONG_FOR_UPDATE,
-                        payload: null
-                    });
                     // UPDATE THE CURRENT LIST WITH NEWLY ADDED SONG
                     storeReducer({
                         type: GlobalStoreActionType.SET_CURRENT_LIST,
                         payload: playlist
                     });
-                    store.closeUpdateSongModal();
                 }
             }
         }
         updateSong(store.currentList._id, song, position)
+        store.closeUpdateSongModal()
     }
 
     store.updateSongTransaction = function(newSong) {
