@@ -18,13 +18,13 @@ const ListSelector = () => {
 
     function handleCreateNewList() {
         console.log(store.newListCounter);
-        var name = "Untitled"
+        var name = "Untitled " + store.newListCounter
         var songs = [] 
         store.createNewList(name, songs);
     }
     let listCard = "";
     if (store) {
-        listCard = store.idNamePairs.sort((a,b) => a.name > b.name ? 1 : -1)
+        listCard = store.idNamePairs.sort((a,b) => a.name.localeCompare(b.name, undefined , {numeric: true, sensitivity: 'base'}))
         listCard = store.idNamePairs.map((pair) => (
             <ListCard
                 key={pair._id}

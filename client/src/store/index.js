@@ -95,7 +95,7 @@ export const useGlobalStore = () => {
                 return setStore({
                     idNamePairs: payload,
                     currentList: null,
-                    newListCounter: store.newListCounter,
+                    newListCounter: payload.length+1,
                     listNameActive: false,
                     transaction: tps
                 });
@@ -305,6 +305,7 @@ export const useGlobalStore = () => {
             const response = await api.getPlaylistPairs();
             if (response.data.success) {
                 let pairsArray = response.data.idNamePairs;
+                console.log(pairsArray.length)
                 storeReducer({
                     type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
                     payload: pairsArray
