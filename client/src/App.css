@@ -55,7 +55,7 @@ body {
   border-width: 2px;
   border-style: solid;
   border-radius: 10px;
-  padding-left: 2%;
+  padding-left: 1%;
 }
 
 #playlist-selector-heading{
@@ -74,11 +74,20 @@ body {
 }
 
 #playlist-selector, #playlist-cards {
-  height: 80%;
-  overflow: scroll;
+  height: 85%;
   grid-column: 1 / 3;
   grid-row: 2 / 3;
   background-color: var(--swatch-primary);
+}
+
+#playlist-cards {
+  overflow: scroll;
+  height: 75%;
+}
+
+#list-selector-list{
+  height: 80%;
+  overflow: scroll;
 }
 
 .playlister-button, .playlister-button-disabled {

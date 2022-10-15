@@ -6,6 +6,7 @@ import { GlobalStoreContext } from '../store'
     This React component lists all the playlists in the UI.
     
     @author McKilla Gorilla
+    @author Rezvan Nafee
 */
 const ListSelector = () => {
     const { store } = useContext(GlobalStoreContext);
@@ -48,7 +49,6 @@ const ListSelector = () => {
 
     return (
         <div id="playlist-selector">
-            <div id="list-selector-list">
             <div id="playlist-selector-heading">
             <input
                     type="button"
@@ -58,7 +58,8 @@ const ListSelector = () => {
                     disabled = {cardStatus}
                     value="+" />
                     &nbsp;Your Lists
-            </div>                {
+            </div> 
+            <div id="list-selector-list">{
                     listCard
                 }
             </div>

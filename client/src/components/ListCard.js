@@ -55,7 +55,7 @@ function ListCard(props) {
     }
 
     function handleUpdateText(event) {
-        setText(event.target.value );
+        setText(event.target.value);
     }
 
 

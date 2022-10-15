@@ -34,6 +34,12 @@ function PlaylistCards() {
         }
     }, [handleKeyPress])
 
+    // Check if we currently have a current list
+    if(!store.currentList){
+        store.history.push("/")
+        return <></>
+    }
+
     return (
         <div id="playlist-cards">
         {
